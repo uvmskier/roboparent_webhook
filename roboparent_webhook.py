@@ -20,7 +20,10 @@ import dotenv, os
 
 from slack_sdk import signature
 
-dotenv.load_dotenv('secrets.env')
+if socket.gethostname() == 'nuc1':
+    dotenv.load_dotenv('/home/brian/python-scripts/secrets.env')
+else:
+    dotenv.load_dotenv('secrets.env')
 
 slack_signing_secret = os.getenv('SLACK_SIGNING_SECRET')
 
@@ -128,7 +131,7 @@ def roboparentEvent():
         jsonData = json.loads(payload)
         jsonObjectToLog = parseSlackMessage(jsonData['actions'][0]['value'])
         jsonObjectToLog['slackuser'] = jsonData['user']['name']
-        
+
         logger.info('Event Received', extra=jsonObjectToLog)
     
         mySQLObject = pythonmysql.PythonMySQL()

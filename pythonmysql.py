@@ -2,7 +2,7 @@ import mysql.connector
 import datetime
 from datetime import date, datetime, timedelta
 
-import dotenv, os
+import dotenv, os, socket
 
 class PythonMySQL:
 
@@ -11,7 +11,10 @@ class PythonMySQL:
   #postcondition:  database initialized
   def __init__(self):
 
-    dotenv.load_dotenv('secrets.env')
+    if socket.gethostname() == 'nuc1':
+      dotenv.load_dotenv('/home/brian/python-scripts/secrets.env')
+    else:
+      dotenv.load_dotenv('secrets.env')
 
     self.myDB = mysql.connector.connect(
     host=os.getenv('DB_HOST'),
