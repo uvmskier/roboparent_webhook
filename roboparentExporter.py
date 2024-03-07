@@ -12,18 +12,19 @@ class CustomCollector(Collector):
         ROBOPARENT_NUMBER_OF_KIDS_GAUGE = GaugeMetricFamily("ROBOPARENT_NUMBER_OF_KIDS", 'Roboparent Number of Kids', value=kids)
         yield ROBOPARENT_NUMBER_OF_KIDS_GAUGE
         
-        requiredRoomStatus = self.myDBObject.getCurrentRequiredRoomStatus()
-        ROBOPARENT_REQUIRED_ROOM_STATUS = GaugeMetricFamily("ROBOPARENT_REQUIRED_ROOM_STATUS", 'Roboparent required room status', value=requiredRoomStatus)
-        yield ROBOPARENT_REQUIRED_ROOM_STATUS
+        ROBOPARENT_REQUIRED_ROOM_STATUS = GaugeMetricFamily("ROBOPARENT_REQUIRED_ROOM_STATUS", 'Roboparent required room status', labels=['kid'])
 
         ROBOPARENT_ROOM_STATUS_GAUGE = GaugeMetricFamily("ROBOPARENT_ROOM_STATUS", 'Roboparent room status for each kid',labels=['kid'])
         ROBOPARENT_ROOM_COMPLIANCE_GAUGE = GaugeMetricFamily("ROBOPARENT_ROOM_COMPLIANCE", 'Roboparent room compliance for each kid',labels=['kid'])
         #get all kid records so we know what room statuses to query and what metrics to publish
         kidRecords = self.myDBObject.getAllKidRecords()
         for (name) in kidRecords:
-            #set room status in the guage
+            #set room status and required room status in the guage
             roomStatus = self.myDBObject.getRoomStatus(name[0])
             ROBOPARENT_ROOM_STATUS_GAUGE.add_metric([name[0]],roomStatus)
+            requiredRoomStatus = self.myDBObject.getCurrentRequiredRoomStatus(name[0])
+            ROBOPARENT_REQUIRED_ROOM_STATUS.add_metric([name[0]],requiredRoomStatus)
+            
             #if the room status is greater than or equal to the required room status, set compliance to 1, if not, set it to 0
             if(roomStatus >= requiredRoomStatus):
                 ROBOPARENT_ROOM_COMPLIANCE_GAUGE.add_metric([name[0]],1)
@@ -31,6 +32,7 @@ class CustomCollector(Collector):
                 ROBOPARENT_ROOM_COMPLIANCE_GAUGE.add_metric([name[0]],0)
         yield ROBOPARENT_ROOM_STATUS_GAUGE
         yield ROBOPARENT_ROOM_COMPLIANCE_GAUGE
+        yield ROBOPARENT_REQUIRED_ROOM_STATUS
 
 if __name__ == '__main__':
     start_http_server(5002)

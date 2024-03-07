@@ -130,16 +130,15 @@ class PythonMySQL:
     elif roomStatus == 'Snooze':
       return 2
     del selectCursor
-  def getCutoffTimeForDay(self,day):
+  def getCutoffTimeForDay(self,day,kid):
     selectCursor = self.myDB.cursor(buffered=True)
-    sql = "select cutofftime from cutofftime where dayName = \"{}\";".format(day)
+    sql = "select cutofftime from cutofftime where dayName = \"{}\" and kid = \"{}\";".format(day, kid)
     selectCursor.execute(sql)
     result = selectCursor.fetchone()
     cutoffTime = result[0]
     return cutoffTime
-  def getCurrentRequiredRoomStatus(self):
-    selectCursor = self.myDB.cursor(buffered=True)
-    cutoffTime = self.getCutoffTimeForDay(datetime.strftime(datetime.today(),"%A"))
+  def getCurrentRequiredRoomStatus(self,kid):
+    cutoffTime = self.getCutoffTimeForDay(datetime.strftime(datetime.today(),"%A"),kid)
     now = datetime.now()
     if(timedelta(hours=now.hour, minutes=now.minute, seconds=now.second) < cutoffTime):
       return 0
